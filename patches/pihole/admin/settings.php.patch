@@ -1,20 +1,37 @@
 diff --git a/admin/settings.php b/admin/settings.php
-index fca9a3cd..09744f33 100644
+index fca9a3cd..b5fbcd27 100644
 --- a/admin/settings.php
 +++ b/admin/settings.php
-@@ -104,6 +104,11 @@ if (isset($setupVars["IPV6_ADDRESS"])) {
- $hostname = trim(file_get_contents("/etc/hostname"), "\x00..\x1F");
+@@ -105,6 +105,28 @@ $hostname = trim(file_get_contents("/etc/hostname"), "\x00..\x1F");
  ?>
  
-+<?php
+ <?php
 +// Lancache settings
++$LCServices = [];
++$LCServicesActive = [];
 +
++//TODO: Read cache_domains.json
++if (file_exists("/etc/pihole-extra/cache-domains/cache_domains.json")) {
++    $cache_domains = json_decode(file_get_contents("/etc/pihole-extra/cache-domains/cache_domains.json"));
++    $cache_domains = $cache_domains->cache_domains;
++
++    foreach ($cache_domains as $key => $value) {
++        $LCServices[$value->name] = ['description' => $value->description];
++        if (isset($setupVars["LANCACHE_SERVICE_" . strtoupper($value->name)])
++            && $setupVars["LANCACHE_SERVICE_" . strtoupper($value->name)] == 1) {
++            $LCServices[$value->name]['enabled'] = true;
++        } else {
++            $LCServices[$value->name]['enabled'] = false;
++        }
++    }
++}
 +?>
 +
- <?php
++<?php
  // DNS settings
  $DNSservers = [];
-@@ -224,7 +229,7 @@ if (isset($setupVars["API_PRIVACY_MODE"])) {
+ $DNSactive = [];
+@@ -224,7 +246,7 @@ if (isset($setupVars["API_PRIVACY_MODE"])) {
  ?>
  
  <?php
@@ -23,7 +40,7 @@ index fca9a3cd..09744f33 100644
      $tab = $_GET['tab'];
  } else {
      $tab = "sysadmin";
-@@ -238,6 +243,7 @@ if (isset($_GET['tab']) && in_array($_GET['tab'], array("sysadmin", "blocklists"
+@@ -238,6 +260,7 @@ if (isset($_GET['tab']) && in_array($_GET['tab'], array("sysadmin", "blocklists"
                  <li<?php if($tab === "blocklists"){ ?> class="active"<?php } ?>><a data-toggle="tab" href="#blocklists">Blocklists</a></li>
                  <li<?php if($tab === "dns"){ ?> class="active"<?php } ?>><a data-toggle="tab" href="#dns">DNS</a></li>
                  <li<?php if($tab === "piholedhcp"){ ?> class="active"<?php } ?>><a data-toggle="tab" href="#piholedhcp">DHCP</a></li>
@@ -31,7 +48,7 @@ index fca9a3cd..09744f33 100644
                  <li<?php if($tab === "api"){ ?> class="active"<?php } ?>><a data-toggle="tab" href="#api">API / Web interface</a></li>
                  <li<?php if($tab === "privacy"){ ?> class="active"<?php } ?>><a data-toggle="tab" href="#privacy">Privacy</a></li>
                  <li<?php if($tab === "teleporter"){ ?> class="active"<?php } ?>><a data-toggle="tab" href="#teleporter">Teleporter</a></li>
-@@ -901,8 +907,105 @@ if (isset($_GET['tab']) && in_array($_GET['tab'], array("sysadmin", "blocklists"
+@@ -901,8 +924,149 @@ if (isset($_GET['tab']) && in_array($_GET['tab'], array("sysadmin", "blocklists"
                              </div>
                          </div>
                      </form>
@@ -47,7 +64,14 @@ index fca9a3cd..09744f33 100644
 +                    } else {
 +                        $LANC = false;
 +                    }
-+                    /*// Read setings from config file
++                    // Read setings from config file
++                    /*if (isset($setupVars["LANCACHE_SERVICE_APPLE"]) && $setupVars["LANCACHE_SERVICE_APPLE"] == 1) {
++                        $LANC_SERVICE_APPLE = true;
++                    } else {
++                        $LANC_SERVICE_APPLE = false;
++                    }
++
++
 +                    if (isset($setupVars["DHCP_START"])) {
 +                        $DHCPstart = $setupVars["DHCP_START"];
 +                    } else {
@@ -127,6 +151,43 @@ index fca9a3cd..09744f33 100644
 +                                                            ?>>Lancache enabled</label>
 +                                                    </div>
 +                                                </div>
++                                            </div>
++                                        </div>
++                                        <div class="row">
++                                            <div class="col-xs-12">
++                                                <label>TODO</label>
++                                            </div>
++                                        </div>
++                                    </div>
++                                </div>
++                            </div>
++                            <!-- Lancache service settings box -->
++                            <div class="col-md-6">
++                                <div class="box box-warning">
++                                    <div class="box-header with-border">
++                                        <h3 class="box-title">Lancache services</h3>
++                                    </div>
++                                    <div class="box-body">
++                                        <div class="row">
++                                            <div class="col-md-12">
++                                                <table class="table table-bordered">
++                                                    <tr>
++                                                        <th>Name</th>
++                                                        <th>Description</th>
++                                                        <th colspan="2">Enabled</th>
++                                                    </tr>
++                                                    <?php foreach ($LCServices as $key => $value) { ?>
++                                                        <tr>
++                                                            <td><?php echo $key; ?></td>
++                                                            <td><?php echo $value['description']; ?></td>
++                                                            <td title="<?php echo $key; ?>">
++                                                                <input type="checkbox" name="LANC_<?php echo $key; ?>" value="true"
++                                                                           <?php if (isset($value["enabled"]) && $value["enabled"] == true){ ?>checked<?php } ?>>
++                                                            </td>
++                                                        </tr>
++                                                    <?php } ?>
++                                                </table>
++
 +                                            </div>
 +                                        </div>
 +                                    </div>
