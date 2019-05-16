@@ -1,0 +1,13 @@
+diff --git a/scripts/create-dnsmasq.sh b/scripts/create-dnsmasq.sh
+index e0e0d43..96a39bf 100755
+--- a/scripts/create-dnsmasq.sh
++++ b/scripts/create-dnsmasq.sh
+@@ -43,7 +43,7 @@ while read entry; do
+         while read fileid; do
+                 while read filename; do
+                         destfilename=$(echo $filename | sed -e 's/txt/conf/')
+-                        outputfile=${outputdir}/${destfilename}
++                        outputfile="${outputdir}/99-lancache-${destfilename}"
+                         touch $outputfile
+                         while read fileentry; do
+                                 # Ignore comments

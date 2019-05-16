@@ -1,0 +1,141 @@
+diff --git a/admin/settings.php b/admin/settings.php
+index fca9a3cd..09744f33 100644
+--- a/admin/settings.php
++++ b/admin/settings.php
+@@ -104,6 +104,11 @@ if (isset($setupVars["IPV6_ADDRESS"])) {
+ $hostname = trim(file_get_contents("/etc/hostname"), "\x00..\x1F");
+ ?>
+ 
++<?php
++// Lancache settings
++
++?>
++
+ <?php
+ // DNS settings
+ $DNSservers = [];
+@@ -224,7 +229,7 @@ if (isset($setupVars["API_PRIVACY_MODE"])) {
+ ?>
+ 
+ <?php
+-if (isset($_GET['tab']) && in_array($_GET['tab'], array("sysadmin", "blocklists", "dns", "piholedhcp", "api", "privacy", "teleporter"))) {
++if (isset($_GET['tab']) && in_array($_GET['tab'], array("sysadmin", "blocklists", "dns", "piholedhcp", "lancache", "api", "privacy", "teleporter"))) {
+     $tab = $_GET['tab'];
+ } else {
+     $tab = "sysadmin";
+@@ -238,6 +243,7 @@ if (isset($_GET['tab']) && in_array($_GET['tab'], array("sysadmin", "blocklists"
+                 <li<?php if($tab === "blocklists"){ ?> class="active"<?php } ?>><a data-toggle="tab" href="#blocklists">Blocklists</a></li>
+                 <li<?php if($tab === "dns"){ ?> class="active"<?php } ?>><a data-toggle="tab" href="#dns">DNS</a></li>
+                 <li<?php if($tab === "piholedhcp"){ ?> class="active"<?php } ?>><a data-toggle="tab" href="#piholedhcp">DHCP</a></li>
++                <li<?php if($tab === "lancache"){ ?> class="active"<?php } ?>><a data-toggle="tab" href="#lancache">Lancache</a></li>
+                 <li<?php if($tab === "api"){ ?> class="active"<?php } ?>><a data-toggle="tab" href="#api">API / Web interface</a></li>
+                 <li<?php if($tab === "privacy"){ ?> class="active"<?php } ?>><a data-toggle="tab" href="#privacy">Privacy</a></li>
+                 <li<?php if($tab === "teleporter"){ ?> class="active"<?php } ?>><a data-toggle="tab" href="#teleporter">Teleporter</a></li>
+@@ -901,8 +907,105 @@ if (isset($_GET['tab']) && in_array($_GET['tab'], array("sysadmin", "blocklists"
+                             </div>
+                         </div>
+                     </form>
+-                </div>
+-                <!-- ######################################################### API and Web ######################################################### -->
++                </div>        
++				<!-- ######################################################### Lancache ######################################################### -->
++                <?php
++                // Lancache server
++                if (isset($setupVars["LANCACHE_ACTIVE"])) {
++                    if ($setupVars["LANCACHE_ACTIVE"] == 1) {
++                        $LANC = true;
++                    } else {
++                        $LANC = false;
++                    }
++                    /*// Read setings from config file
++                    if (isset($setupVars["DHCP_START"])) {
++                        $DHCPstart = $setupVars["DHCP_START"];
++                    } else {
++                        $DHCPstart = "";
++                    }
++                    if (isset($setupVars["DHCP_END"])) {
++                        $DHCPend = $setupVars["DHCP_END"];
++                    } else {
++                        $DHCPend = "";
++                    }
++                    if (isset($setupVars["DHCP_ROUTER"])) {
++                        $DHCProuter = $setupVars["DHCP_ROUTER"];
++                    } else {
++                        $DHCProuter = "";
++                    }
++
++                    // This setting has been added later, we have to check if it exists
++                    if (isset($setupVars["DHCP_LEASETIME"])) {
++                        $DHCPleasetime = $setupVars["DHCP_LEASETIME"];
++                        if (strlen($DHCPleasetime) < 1) {
++                            // Fallback if empty string
++                            $DHCPleasetime = 24;
++                        }
++                    } else {
++                        $DHCPleasetime = 24;
++                    }
++                    if (isset($setupVars["DHCP_IPv6"])) {
++                        $DHCPIPv6 = $setupVars["DHCP_IPv6"];
++                    } else {
++                        $DHCPIPv6 = false;
++                    }
++                    if (isset($setupVars["DHCP_rapid_commit"])) {
++                        $DHCP_rapid_commit = $setupVars["DHCP_rapid_commit"];
++                    } else {
++                        $DHCP_rapid_commit = false;
++                    }
++
++                } else {
++                    $DHCP = false;
++                    // Try to guess initial settings
++                    if ($piHoleIPv4 !== "unknown") {
++                        $DHCPdomain = explode(".", $piHoleIPv4);
++                        $DHCPstart = $DHCPdomain[0] . "." . $DHCPdomain[1] . "." . $DHCPdomain[2] . ".201";
++                        $DHCPend = $DHCPdomain[0] . "." . $DHCPdomain[1] . "." . $DHCPdomain[2] . ".251";
++                        $DHCProuter = $DHCPdomain[0] . "." . $DHCPdomain[1] . "." . $DHCPdomain[2] . ".1";
++                    } else {
++                        $DHCPstart = "";
++                        $DHCPend = "";
++                        $DHCProuter = "";
++                    }
++                    $DHCPleasetime = 24;
++                    $DHCPIPv6 = false;
++                    $DHCP_rapid_commit = false;*/
++                }
++                /*if (isset($setupVars["PIHOLE_DOMAIN"])) {
++                    $piHoleDomain = $setupVars["PIHOLE_DOMAIN"];
++                } else {
++                    $piHoleDomain = "lan";
++                }*/
++                ?>
++                <div id="lancache" class="tab-pane fade <?php if($tab === "lancache"){ ?> in active<?php } ?>">
++                    <form role="form" method="post">
++                        <div class="row">
++                            <!-- Lancache settings box -->
++                            <div class="col-md-6">
++                                <div class="box box-warning">
++                                    <div class="box-header with-border">
++                                        <h3 class="box-title">Lancache settings</h3>
++                                    </div>
++                                    <div class="box-body">
++                                        <div class="row">
++                                            <div class="col-md-12">
++                                                <div class="form-group">
++                                                    <div class="checkbox">
++                                                        <label><input type="checkbox" name="active" id="LANCchk"
++                                                            <?php if ($LANC) {?>checked<?php }
++                                                            ?>>Lancache enabled</label>
++                                                    </div>
++                                                </div>
++                                            </div>
++                                        </div>
++                                    </div>
++                                </div>
++                            </div>
++                        </div>
++                    </form>
++				</div>
++				<!-- ######################################################### API and Web ######################################################### -->
+                 <?php
+                 // CPU temperature unit
+                 if (isset($setupVars["TEMPERATUREUNIT"])) {
